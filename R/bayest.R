@@ -1,4 +1,4 @@
-bayes.t.test <- function(n,plot,firstComp,secondComp,hyperpars,ci,burnin,sd,q){
+bayes.t.test <- function(n=10000,plot="all",firstComp,secondComp,hyperpars="wide",ci="0.95",burnin=n/2,sd="sd",q=0.1){
   
   # utility function for computing the mode
   getmode <- function(v) {
@@ -95,8 +95,26 @@ bayes.t.test <- function(n,plot,firstComp,secondComp,hyperpars,ci,burnin,sd,q){
     C0=-0.5*var(smple)+(c0+0.5*(length(firstComp)+length(secondComp)))*q # Raftery's hyperparameters
     
   }
-  if(hyperpars=="bensmails"){
-    # TODO
+  if(hyperpars=="wide"){
+    smple=c(firstComponent,secondComponent)
+    b0=mean(smple)
+    B0=10*var(smple)
+    c0=0.01
+    C0=0.01
+  }
+  if(hyperpars=="medium"){
+    smple=c(firstComponent,secondComponent)
+    b0=mean(smple)
+    B0=5*var(smple)
+    c0=0.1
+    C0=0.1
+  }
+  if(hyperpars=="narrow"){
+    smple=c(firstComponent,secondComponent)
+    b0=mean(smple)
+    B0=1*var(smple)
+    c0=1
+    C0=1
   }
   
   
@@ -453,18 +471,54 @@ bayes.t.test <- function(n,plot,firstComp,secondComp,hyperpars,ci,burnin,sd,q){
   if(plot=="none"){
     # return dataframe of both modes, do not print/plot anything
     if(sd=="var"){
-      Parameter=c("Difference of means (mu2-mu1)", "Difference of variances (sigma2^2-sigma1^2)","Effect size")
+      Parameter=c("Difference of means (mu2-mu1)", "Difference of variances (sigma2^2-sigma1^2)","Effect size","MAPE")
     }
     if(sd=="sd"){
-      Parameter=c("Difference of means (mu2-mu1)", "Difference of standard deviations (sigma2-sigma1)","Effect size")
+      Parameter=c("Difference of means (mu2-mu1)", "Difference of standard deviations (sigma2-sigma1)","Effect size","MAPE")
     }
-    PosteriorMode=c(getmode(diffOfMeans),getmode(diffOfVariances),getmode(effectSize))
-    PosteriorExpectation=c(mean(diffOfMeans),mean(diffOfVariances),mean(effectSize))
-    LowerCI=c(quantile(diffOfMeans,probs=c((1-credibleLevel)/2,credibleLevel+(1-credibleLevel)/2))[1],quantile(diffOfVariances,probs=c((1-credibleLevel)/2,credibleLevel+(1-credibleLevel)/2))[1],quantile(effectSize,probs=c((1-credibleLevel)/2,credibleLevel+(1-credibleLevel)/2))[1])
-    UpperCI=c(quantile(diffOfMeans,probs=c(1-credibleLevel,credibleLevel))[2],quantile(diffOfVariances,probs=c(1-credibleLevel,credibleLevel))[2],quantile(effectSize,probs=c((1-credibleLevel)/2,credibleLevel+(1-credibleLevel)/2))[2])
+    PosteriorMode=c(getmode(diffOfMeans),getmode(diffOfVariances),getmode(effectSize),-1)
+    PosteriorExpectation=c(mean(diffOfMeans),mean(diffOfVariances),mean(effectSize),-1)
+    LowerCI=c(quantile(diffOfMeans,probs=c((1-credibleLevel)/2,credibleLevel+(1-credibleLevel)/2))[1],quantile(diffOfVariances,probs=c((1-credibleLevel)/2,credibleLevel+(1-credibleLevel)/2))[1],quantile(effectSize,probs=c((1-credibleLevel)/2,credibleLevel+(1-credibleLevel)/2))[1],-1)
+    UpperCI=c(quantile(diffOfMeans,probs=c(1-credibleLevel,credibleLevel))[2],quantile(diffOfVariances,probs=c(1-credibleLevel,credibleLevel))[2],quantile(effectSize,probs=c((1-credibleLevel)/2,credibleLevel+(1-credibleLevel)/2))[2],-1)
     
+    effSizeCI=quantile(effectSize,probs=c(((1-ci)/2),(ci+(1-ci)/2)))
+    effectSizeCIValues = effectSize[effectSize >effSizeCI[1] & effectSize < effSizeCI[2]]
+    largePosEffectIterations = length(which(effectSizeCIValues >= 0.8))/length(effectSizeCIValues)
+    largeNegEffectIterations = length(which(effectSizeCIValues <= -0.8))/length(effectSizeCIValues)
+    mediumPosEffectIterations = length(which(effectSizeCIValues >= 0.5 & effectSizeCIValues < 0.8))/length(effectSizeCIValues)
+    mediumNegEffectIterations = length(which(effectSizeCIValues <= -0.5 & effectSizeCIValues > -0.8))/length(effectSizeCIValues)
+    smallPosEffectIterations = length(which(effectSizeCIValues >= 0.2 & effectSizeCIValues < 0.5))/length(effectSizeCIValues)
+    smallNegEffectIterations = length(which(effectSizeCIValues <= -0.2 & effectSizeCIValues > -0.5))/length(effectSizeCIValues)
+    noEffectIterations = length(which(effectSizeCIValues < 0.2 & effectSizeCIValues > -0.2))/length(effectSizeCIValues)
     
-    df=data.frame(Parameter,PosteriorMode,PosteriorExpectation,LowerCI,UpperCI)
+    pct=c(largeNegEffectIterations,mediumNegEffectIterations,smallNegEffectIterations,noEffectIterations,smallPosEffectIterations,mediumPosEffectIterations,largePosEffectIterations)
+    pct=round(pct,digits=4)
+    pct=pct*100
+    mx=max(pct)
+    indx=which(pct==mx)
+    if(indx==1){
+      str<-"Large Negative"
+    }
+    if(indx==2){
+      str<-"Medium Negative"
+    }
+    if(indx==3){
+      str<-"Small Negative"
+    }
+    if(indx==4){
+      str<-"No Effect"
+    }
+    if(indx==5){
+      str<-"Small Positive"
+    }
+    if(indx==6){
+      str<-"Medium Positive"
+    }
+    if(indx==7){
+      str<-"Large Positive"
+    }
+    MAPE<-c(0,0,0,indx)
+    df=data.frame(Parameter,PosteriorMode,PosteriorExpectation,LowerCI,UpperCI,MAPE)
     df
   }
 }

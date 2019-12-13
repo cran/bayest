@@ -62,8 +62,8 @@ Riko Kelter
 \examples{
 x=rnorm(100,mean=0,sd=1)
 y=rnorm(100,mean=1,sd=1)
-bayes.t.test(n=7500,plot="all",firstComp=x,secondComp=y,
-hyperpars="custom",ci=0.95,burnin=5000,sd="sd",q=0.1)
+bayes.t.test(n=2500,plot="all",firstComp=x,secondComp=y,
+hyperpars="custom",ci=0.95,burnin=1250,sd="sd",q=0.1)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
