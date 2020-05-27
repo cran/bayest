@@ -20,7 +20,7 @@ bayes.t.test <-
            firstComp,
            secondComp,
            hyperpars = "wide",
-           ci = "0.95",
+           ci = 0.95,
            burnin = n / 2,
            sd = "sd",
            q = 0.1) {
@@ -908,5 +908,8 @@ bayes.t.test <-
                       UpperCI,
                       MAPE)
       df
+    }
+    if(plot == "samples"){
+      effectSize
     }
   }
