@@ -1,6 +1,6 @@
-ee034ce050107ac1d5e7d75d52b36190 *DESCRIPTION
+1316e143dc2b7811c3a8a959bcdd9c1c *DESCRIPTION
 bfceb25e58448e0d1f022702dd6e07d6 *NAMESPACE
-95aac243ba29c518ec014288750a559b *R/bayest.R
-35fe769f8a5cbcf21f5021304be0a768 *build/partial.rdb
-9bfea72cc3fe5bfcaf9aac09476937e8 *man/bayes.t.test.Rd
+aa885c78d8612280faaea77b44edc8eb *R/bayest.R
+fe3c94bc330360c26ad6934b7adce0a0 *build/partial.rdb
+eeaa9385df2b1d0d0d19d430d1b8a4ef *man/bayes.t.test.Rd
 e5dc903490c68737b73209c72ebe2248 *man/bayest-package.Rd

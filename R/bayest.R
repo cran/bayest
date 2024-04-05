@@ -29,6 +29,7 @@ bayes.t.test <-
       uniqv <- unique(v)
       uniqv[which.max(tabulate(match(v, uniqv)))]
     }
+    output = NULL
     
     # Set the credible level
     credibleLevel = ci
@@ -101,7 +102,12 @@ bayes.t.test <-
       c0 = 1.28 # Raftery's hyperparameters
       C0 = -0.5 * var(smple) + (c0 + 0.5 * (length(firstComp) + length(secondComp))) *
         q
-      
+    }
+    if (hyperpars == "weaklyinformative") {
+      b0 = 0
+      B0 = 2
+      c0 = 1.1  # mean of inverse gamma distribution is C0/(c0-1) if c0>1; thus c0=1.1 and C0=1 ensures expected variance of 50 a priori 
+      C0 = 5
     }
     if (hyperpars == "wide") {
       smple = c(firstComponent, secondComponent)
@@ -284,7 +290,7 @@ bayes.t.test <-
     }
     
     # output
-    if (plot == "all") {
+     if (plot == "all") {
       plotpar <- par(mfrow = c(2, 2))
       # Reset par only after first change of par
       on.exit(par(plotpar))
@@ -314,9 +320,9 @@ bayes.t.test <-
       mcmcListObj = coda::mcmc.list(mcmcObj1, mcmcObj2, mcmcObj3, mcmcObj4)
       coda::gelman.plot(mcmcListObj, auto.layout = FALSE)
       stats::acf(mu1)
-      
-      
-      
+
+
+
       plotpar <- par(mfrow = c(2, 2))
       hist(
         mu2,
@@ -344,7 +350,7 @@ bayes.t.test <-
       mcmcListObj = coda::mcmc.list(mcmcObj1, mcmcObj2, mcmcObj3, mcmcObj4)
       coda::gelman.plot(mcmcListObj, auto.layout = FALSE)
       stats::acf(mu2)
-      
+
       plotpar <- par(mfrow = c(2, 2))
       if (sd == "var") {
         hist(
@@ -391,8 +397,8 @@ bayes.t.test <-
       mcmcListObj = coda::mcmc.list(mcmcObj1, mcmcObj2, mcmcObj3, mcmcObj4)
       coda::gelman.plot(mcmcListObj, auto.layout = FALSE)
       stats::acf(sigma1Sq)
-      
-      
+
+
       plotpar <- par(mfrow = c(2, 2))
       if (sd == "var") {
         hist(
@@ -439,7 +445,7 @@ bayes.t.test <-
       mcmcListObj = coda::mcmc.list(mcmcObj1, mcmcObj2, mcmcObj3, mcmcObj4)
       coda::gelman.plot(mcmcListObj, auto.layout = FALSE)
       stats::acf(sigma2Sq)
-      
+
       plotpar <- par(mfrow = c(2, 2))
       hist(
         diffOfMeans,
@@ -467,7 +473,7 @@ bayes.t.test <-
       mcmcListObj = coda::mcmc.list(mcmcObj1, mcmcObj2, mcmcObj3, mcmcObj4)
       coda::gelman.plot(mcmcListObj, auto.layout = FALSE)
       stats::acf(diffOfMeans)
-      
+
       plotpar <- par(mfrow = c(2, 2))
       if (sd == "var") {
         hist(
@@ -516,7 +522,7 @@ bayes.t.test <-
       mcmcListObj = coda::mcmc.list(mcmcObj1, mcmcObj2, mcmcObj3, mcmcObj4)
       coda::gelman.plot(mcmcListObj, auto.layout = FALSE)
       stats::acf(diffOfVariances)
-      
+
       plotpar <- par(mfrow = c(2, 2))
       hist(
         effectSize,
@@ -544,10 +550,10 @@ bayes.t.test <-
       mcmcListObj = coda::mcmc.list(mcmcObj1, mcmcObj2, mcmcObj3, mcmcObj4)
       coda::gelman.plot(mcmcListObj, auto.layout = FALSE)
       stats::acf(effectSize)
-      
+
       # Set 2x1 par
       oldpar <- par(mfrow = c(2, 1))
-      
+
       # Effect size posterior histogram
       # Make a vector of values to draw ticks at:
       hist(
@@ -556,6 +562,7 @@ bayes.t.test <-
         col = "cornflowerblue",
         border = "white",
         xlab = expression(delta),
+        breaks = seq(min(effectSize), max(effectSize), length.out = 100),
         main = mtext(
           "Posterior distribution of Effect size " ~ delta,
           side = 3,
@@ -569,7 +576,7 @@ bayes.t.test <-
       ticks <- seq(from = -3, to = 3, by = 0.1)
       # And draw the axis:
       axis(1, at = ticks)
-      
+
       # Posterior mode
       #abline(v=getmode(effectSize),col="blue",lwd=2,lty="solid")
       lines(
@@ -579,7 +586,7 @@ bayes.t.test <-
         lwd = 2.5,
         col = "blue"
       )
-      
+
       # Posterior CI
       postCI = quantile(effectSize, probs = c((1 - ci) / 2, ci + (1 - ci) /
                                                 2))
@@ -604,7 +611,7 @@ bayes.t.test <-
         lwd = 2,
         col = "black"
       )
-      
+
       # Visualization of typical ROPEs
       # ROPE for no effect
       lines(
@@ -629,7 +636,7 @@ bayes.t.test <-
         lwd = 2,
         col = "orange"
       )
-      
+
       # ROPE for medium effect
       lines(
         x = c(-0.8,-0.5),
@@ -660,7 +667,7 @@ bayes.t.test <-
         lwd = 2,
         col = "purple"
       )
-      
+
       abline(
         v = 0.8,
         col = "purple",
@@ -697,7 +704,7 @@ bayes.t.test <-
         lwd = 0.5,
         lty = "dashed"
       )
-      
+
       # Text above the plot
       mtext(
         paste0(
@@ -710,7 +717,7 @@ bayes.t.test <-
           "]"
         ),
         side = 3,
-        line = 0.15,
+        line = 0.20,
         at = min(effectSize),
         col = "black",
         cex = 1,
@@ -720,7 +727,7 @@ bayes.t.test <-
         paste0("Post. Mean: ", round(mean(effectSize), 3)),
         side = 3,
         line = 1.15,
-        at = max(effectSize),
+        at = max(effectSize)-0.02,
         col = "black",
         cex = 1,
         font = 2
@@ -729,13 +736,13 @@ bayes.t.test <-
         paste0("Post. Mode: ", round(getmode(effectSize), 3)),
         side = 3,
         line = 0.15,
-        at = max(effectSize),
+        at = max(effectSize)-0.02,
         col = "black",
         cex = 1,
         font = 2
       )
-      
-      
+
+
       # Bar plot
       effSizeCI = quantile(effectSize, probs = c(((1 - ci) / 2), (ci + (1 -
                                                                           ci) / 2)))
@@ -755,7 +762,7 @@ bayes.t.test <-
                                                 effectSizeCIValues > -0.5)) / length(effectSizeCIValues)
       noEffectIterations = length(which(effectSizeCIValues < 0.2 &
                                           effectSizeCIValues > -0.2)) / length(effectSizeCIValues)
-      
+
       lbls = c(
         "large positive:",
         "medium positive:",
@@ -778,13 +785,13 @@ bayes.t.test <-
       pct = pct * 100
       lbls = paste(lbls, pct)
       lbls <- paste(pct, "%", sep = "") # ad % to labels
-      
+
       # Barplot
       b <- barplot(
         pct,
-        main = "Posterior ROPE-Analysis",
-        xlab = "ROPEs of standard effect sizes",
-        ylab = "Posterior-Percentage included inside ROPE",
+        main = "Bayesian Hodges-Lehmann-Test",
+        xlab = "Interval Hypotheses for effect sizes",
+        ylab = "Posterior mass in Interval Hypothesis",
         names.arg = c("L-", "M-", "S-", "No Eff.", "S+", "M+", "L+"),
         col = "cornflowerblue",
         border = "white",
@@ -795,39 +802,38 @@ bayes.t.test <-
       text(x = b,
            y = pct + 4,
            labels = lbls)
-      
+
       # print out modes
       getmode(diffOfMeans)
       getmode(diffOfVariances)
-      
+
       # return object of both modes
       posteriorModes = c(getmode(diffOfMeans), getmode(diffOfVariances))
       posteriorModes
     }
+    
     if (plot == "none") {
       # return dataframe of both modes, do not print/plot anything
       if (sd == "var") {
         Parameter = c(
           "Difference of means (mu2-mu1)",
           "Difference of variances (sigma2^2-sigma1^2)",
-          "Effect size",
-          "MAPE"
+          "Effect size"
         )
       }
       if (sd == "sd") {
         Parameter = c(
           "Difference of means (mu2-mu1)",
           "Difference of standard deviations (sigma2-sigma1)",
-          "Effect size",
-          "MAPE"
+          "Effect size"
         )
       }
       PosteriorMode = c(getmode(diffOfMeans),
                         getmode(diffOfVariances),
-                        getmode(effectSize),-1)
+                        getmode(effectSize))
       PosteriorExpectation = c(mean(diffOfMeans),
                                mean(diffOfVariances),
-                               mean(effectSize),-1)
+                               mean(effectSize))
       LowerCI = c(
         quantile(diffOfMeans, probs = c((1 - credibleLevel) / 2, credibleLevel +
                                           (1 - credibleLevel) / 2
@@ -837,14 +843,14 @@ bayes.t.test <-
         ))[1],
         quantile(effectSize, probs = c((1 - credibleLevel) / 2, credibleLevel +
                                          (1 - credibleLevel) / 2
-        ))[1],-1
+        ))[1]
       )
       UpperCI = c(
         quantile(diffOfMeans, probs = c(1 - credibleLevel, credibleLevel))[2],
         quantile(diffOfVariances, probs = c(1 - credibleLevel, credibleLevel))[2],
         quantile(effectSize, probs = c((1 - credibleLevel) / 2, credibleLevel +
                                          (1 - credibleLevel) / 2
-        ))[2],-1
+        ))[2]
       )
       
       effSizeCI = quantile(effectSize, probs = c(((1 - ci) / 2), (ci + (1 -
@@ -900,16 +906,18 @@ bayes.t.test <-
       if (indx == 7) {
         str <- "Large Positive"
       }
-      MAPE <- c(0, 0, 0, indx)
-      df = data.frame(Parameter,
-                      PosteriorMode,
-                      PosteriorExpectation,
-                      LowerCI,
-                      UpperCI,
-                      MAPE)
-      df
+      df = data.frame(Parameter=Parameter,
+                      PosteriorMode=PosteriorMode,
+                      PosteriorExpectation=PosteriorExpectation,
+                      LowerCI=LowerCI,
+                      UpperCI=UpperCI)
+      output = df
     }
     if(plot == "samples"){
-      effectSize
+      effSizeCombined = c(effectSize,effectSizeSecC,effectSizeThdC,effectSizeFrtC)
+      output = effSizeCombined
+    }
+    if(!is.null(output)){
+      output
     }
   }

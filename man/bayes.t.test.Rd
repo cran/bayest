@@ -18,7 +18,7 @@ bayes.t.test(n, plot, firstComp, secondComp, hyperpars, ci, burnin, sd, q)
   Number of iterations of the single-block Gibbs sampler used for inference in the two-component Gaussian mixture
 }
   \item{plot}{
-  A string specifying which plots to include for detailed analysis. "none" is used if only the data frame should be returned. "all" is used for detailed plots for an analysis based on the region of practical equivalence (ROPE).
+  A string specifying which plots to include for detailed analysis. "none" is used if only the data frame including the computed posterior MCMC draws should be returned. "all" is used for detailed plots for an analysis based on a Bayesian Hodges-Lehmann test, respectively the region of practical equivalence (ROPE). "samples" is used if a vector of posterior effect size MCMC draws should be returned.
 }
   \item{firstComp}{
   A numeric vector representing the values of the first group
